@@ -1,0 +1,46 @@
+name: Auto Update Config File
+on:
+  # schedule:
+  #   - cron: '0 0 * * *' # 每天凌晨自动触发
+  workflow_dispatch: # 允许你在 GitHub 页面上手动点击运行，方便测试
+
+permissions:
+  contents: write # 💡 核心：必须赋予 Action 往仓库写代码的权限
+
+jobs:
+  update-config:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. 检出仓库代码
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 2. 运行你隐藏的核心提取脚本
+      - name: Run Secret Script & Update File
+        env:
+          SCRIPT_CONTENT: ${{ secrets.CORE_EXTRACT_SCRIPT }}
+        run: |
+          # 动态创建你的核心脚本
+          echo "$SCRIPT_CONTENT" > temp.js
+          node temp.js
+          
+      # 3. 把修改后的配置文件自动提交并推送到 GitHub 仓库
+      - name: Commit and Push Changes
+        run: |
+          # 检查文件是否有变动，没变动就不提交，防止报错
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "检测到配置文件已更新，正在准备提交..."
+            
+            # 配置 Git 机器人账号信息
+            git config --local user.email "github-actions[bot]@users.noreply.github.com"
+            git config --local user.name "github-actions[bot]"
+            
+            # 暂存并提交代码
+            git add config.json
+            git commit -m "chore: 自动更新极验特征码 [skip ci]"
+            
+            # 推送回远程仓库
+            git push
+          else
+            echo "配置文件无变动，跳过提交。"
+          fi
