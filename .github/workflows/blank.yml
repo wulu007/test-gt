@@ -36,7 +36,7 @@ jobs:
             git config --local user.name "github-actions[bot]"
             
             # 暂存并提交代码
-            git add config.json
+            git add .
             git commit -m "chore: 自动更新极验特征码 [skip ci]"
             
             # 推送回远程仓库
