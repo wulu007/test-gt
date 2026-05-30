@@ -33,7 +33,7 @@ jobs:
                
       - name: Update Config File
         run: |
-          node update.js
+          node update.js -o config.json
           rm update.js
 
       - name: Commit and Push Changes
